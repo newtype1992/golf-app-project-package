@@ -1,5 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { getSupabaseEnvStatus } from '@/services/supabase/client';
+
 const commands = [
   'npm install',
   'npx expo start',
@@ -8,6 +10,8 @@ const commands = [
 ];
 
 export default function SetupScreen() {
+  const envStatus = getSupabaseEnvStatus();
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Project Setup</Text>
@@ -18,6 +22,10 @@ export default function SetupScreen() {
         <Text style={styles.copy}>Set these local variables before wiring Supabase:</Text>
         <Text style={styles.code}>EXPO_PUBLIC_SUPABASE_URL</Text>
         <Text style={styles.code}>EXPO_PUBLIC_SUPABASE_ANON_KEY</Text>
+        <Text style={styles.copy}>
+          Status: {envStatus.configured ? 'configured' : 'missing'} | URL:{' '}
+          {envStatus.urlPresent ? 'yes' : 'no'} | anon key {envStatus.anonKeyPresent ? 'yes' : 'no'}
+        </Text>
       </View>
 
       <View style={styles.card}>

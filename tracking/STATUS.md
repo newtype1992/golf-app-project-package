@@ -20,6 +20,7 @@ Current sprint: `Sprint 1`
 - Replaced Apple and watch-specific planning docs with Expo-specific docs.
 - Added an Expo course catalog service and playable-course validation.
 - Wired the Play screen to foreground location permission with live GPS fallback handling.
+- Added a Supabase client, backend course repository, and SQL course schema contract.
 - Verified `npm run typecheck`, `npm run lint`, and web export.
 
 ## Next checkpoint

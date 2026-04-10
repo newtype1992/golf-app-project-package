@@ -1,4 +1,10 @@
+import { hasSupabaseConfig } from '@/services/supabase/client';
+
 import { sampleCourses } from './mock-course';
+import {
+  fetchCourseByIdFromSupabase,
+  fetchCourseSummariesFromSupabase
+} from './supabase-course-repository';
 import type { Course, CourseSummary, Hole } from './types';
 
 function isValidTargetCoordinate(value: Hole['targets'][keyof Hole['targets']]) {
@@ -21,7 +27,39 @@ export function isPlayableCourse(course: Course) {
 }
 
 export async function listCourses(): Promise<CourseSummary[]> {
-  return sampleCourses.map((course) => ({
+  if (hasSupabaseConfig()) {
+    try {
+      const remoteCourses = await fetchCourseSummariesFromSupabase();
+
+      if (remoteCourses.length > 0) {
+        return remoteCourses;
+      }
+    } catch (error) {
+      console.warn('Falling back to seeded course summaries.', error);
+    }
+  }
+
+  return sampleCourses.map((course) => toCourseSummary(course));
+}
+
+export async function getCourseById(courseId: string) {
+  if (hasSupabaseConfig()) {
+    try {
+      const remoteCourse = await fetchCourseByIdFromSupabase(courseId);
+
+      if (remoteCourse) {
+        return remoteCourse;
+      }
+    } catch (error) {
+      console.warn(`Falling back to seeded course for ${courseId}.`, error);
+    }
+  }
+
+  return sampleCourses.find((course) => course.id === courseId) ?? null;
+}
+
+export function toCourseSummary(course: Course): CourseSummary {
+  return {
     id: course.id,
     name: course.name,
     city: course.city,
@@ -29,9 +67,5 @@ export async function listCourses(): Promise<CourseSummary[]> {
     country: course.country,
     holeCount: course.holes.length,
     playable: isPlayableCourse(course)
-  }));
-}
-
-export async function getCourseById(courseId: string) {
-  return sampleCourses.find((course) => course.id === courseId) ?? null;
+  };
 }
