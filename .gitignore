@@ -1,0 +1,21 @@
+# Apple platform build artifacts
+DerivedData/
+build/
+.build/
+
+# Xcode user data
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcuserstate
+
+# SwiftPM
+.swiftpm/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
