@@ -25,3 +25,5 @@ export const sampleCourse: Course = {
   country: 'Canada',
   holes: Array.from({ length: 18 }, (_, index) => createHole(index + 1))
 };
+
+export const sampleCourses: Course[] = [sampleCourse];

@@ -1,13 +1,13 @@
 # Sprint 1: Course Data and GPS
 
-Status: Not started
+Status: In progress
 
 ## Scope
 
-- [ ] playable course validation
-- [ ] manual or imported course loading
-- [ ] foreground location permission flow
-- [ ] yardage calculation from live coordinates
+- [x] playable course validation
+- [x] manual or imported course loading
+- [x] foreground location permission flow
+- [x] yardage calculation from live coordinates
 - [ ] stale GPS handling
 
 ## Exit Criteria

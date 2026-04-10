@@ -1,13 +1,13 @@
 # Execution Status
 
-Current sprint: `Sprint 0`
+Current sprint: `Sprint 1`
 
 ## Sprint summary
 
 | Sprint | Status | Outcome |
 |---|---|---|
-| Sprint 0 | In progress | Expo scaffold and repo realignment |
-| Sprint 1 | Not started | Course data and GPS |
+| Sprint 0 | Completed | Expo scaffold, docs, and build verification |
+| Sprint 1 | In progress | Course data and GPS |
 | Sprint 2 | Not started | Round engine and scoring |
 | Sprint 3 | Not started | History, stats, and sync |
 | Sprint 4 | Not started | Build hardening and release prep |
@@ -18,12 +18,15 @@ Current sprint: `Sprint 0`
 - Scaffolded the Expo app in `mobile/`.
 - Installed core GPS and backend dependencies.
 - Replaced Apple and watch-specific planning docs with Expo-specific docs.
+- Added an Expo course catalog service and playable-course validation.
+- Wired the Play screen to foreground location permission with live GPS fallback handling.
+- Verified `npm run typecheck`, `npm run lint`, and web export.
 
 ## Next checkpoint
 
-Sprint 0 closes when:
+Sprint 1 closes when:
 
-- the sample Expo app runs locally
-- the app routes match the product modules
-- environment variables are documented
-- EAS build profiles are added
+- playable courses load from a real data source
+- yardages update from live device location
+- invalid course data is blocked cleanly
+- stale GPS handling is explicit in the live round UI

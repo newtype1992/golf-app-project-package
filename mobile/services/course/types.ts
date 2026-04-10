@@ -25,3 +25,8 @@ export type Course = {
   country: string;
   holes: Hole[];
 };
+
+export type CourseSummary = Pick<Course, 'id' | 'name' | 'city' | 'region' | 'country'> & {
+  holeCount: number;
+  playable: boolean;
+};

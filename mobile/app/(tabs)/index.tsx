@@ -1,33 +1,143 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { HoleMap } from '@/components/HoleMap';
 import { ScoreInput } from '@/components/ScoreInput';
 import { YardageCard } from '@/components/YardageCard';
-import { sampleCourse } from '@/services/course/mock-course';
+import { getCourseById, isPlayableCourse } from '@/services/course/catalog';
+import type { Coordinate, Course } from '@/services/course/types';
 import { calculateHoleYardages } from '@/services/gps/calculate-yardages';
+import { getCurrentCoordinate, watchForegroundCoordinate } from '@/services/gps/location';
 import { sampleUserLocation } from '@/services/gps/mock-location';
 import { activeRound } from '@/services/roundEngine/mock-rounds';
 
-export default function HomeScreen() {
-  const currentHole = sampleCourse.holes[activeRound.currentHole - 1];
-  const savedHole = activeRound.holeScores[currentHole.number - 1];
-  const yardages = calculateHoleYardages(sampleUserLocation, currentHole.targets, 'yards');
+type GpsState = 'loading' | 'live' | 'demo' | 'unavailable';
 
-  const [strokes, setStrokes] = useState(savedHole.strokes ?? currentHole.par);
-  const [putts, setPutts] = useState(savedHole.putts ?? 2);
-  const [penalties, setPenalties] = useState(savedHole.penalties);
-  const [fairwayHit, setFairwayHit] = useState(savedHole.fairwayHit ?? false);
-  const [gir, setGir] = useState(savedHole.gir ?? false);
+export default function HomeScreen() {
+  const [course, setCourse] = useState<Course | null>(null);
+  const [courseError, setCourseError] = useState<string | null>(null);
+  const [location, setLocation] = useState<Coordinate>(sampleUserLocation);
+  const [gpsState, setGpsState] = useState<GpsState>('loading');
+  const [gpsMessage, setGpsMessage] = useState('Checking location permissions...');
+  const [strokes, setStrokes] = useState(4);
+  const [putts, setPutts] = useState(2);
+  const [penalties, setPenalties] = useState(0);
+  const [fairwayHit, setFairwayHit] = useState(false);
+  const [gir, setGir] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadCourse() {
+      const nextCourse = await getCourseById(activeRound.courseId);
+
+      if (!active) {
+        return;
+      }
+
+      if (!nextCourse || !isPlayableCourse(nextCourse)) {
+        setCourseError('This course is missing playable GPS target data.');
+        return;
+      }
+
+      setCourse(nextCourse);
+    }
+
+    void loadCourse();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    let subscription: { remove: () => void } | null = null;
+
+    async function connectLocation() {
+      const currentLocation = await getCurrentCoordinate();
+
+      if (!active) {
+        return;
+      }
+
+      if (currentLocation) {
+        setLocation(currentLocation);
+        setGpsState('live');
+        setGpsMessage('Live yardages updating from your device location.');
+
+        subscription = await watchForegroundCoordinate((nextCoordinate) => {
+          setLocation(nextCoordinate);
+          setGpsState('live');
+          setGpsMessage('Live yardages updating from your device location.');
+        });
+
+        return;
+      }
+
+      setGpsState('demo');
+      setGpsMessage('Location permission not granted. Showing demo yardages from seeded coordinates.');
+    }
+
+    void connectLocation();
+
+    return () => {
+      active = false;
+      subscription?.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!course) {
+      return;
+    }
+
+    const currentHole = course.holes[activeRound.currentHole - 1];
+    const savedHole = activeRound.holeScores[currentHole.number - 1];
+
+    setStrokes(savedHole.strokes ?? currentHole.par);
+    setPutts(savedHole.putts ?? 2);
+    setPenalties(savedHole.penalties);
+    setFairwayHit(savedHole.fairwayHit ?? false);
+    setGir(savedHole.gir ?? false);
+  }, [course]);
+
+  if (courseError) {
+    return (
+      <View style={styles.errorState}>
+        <Text style={styles.errorTitle}>Course Unavailable</Text>
+        <Text style={styles.errorCopy}>{courseError}</Text>
+      </View>
+    );
+  }
+
+  if (!course) {
+    return (
+      <View style={styles.errorState}>
+        <Text style={styles.errorTitle}>Loading Round</Text>
+        <Text style={styles.errorCopy}>Preparing course data and active hole context.</Text>
+      </View>
+    );
+  }
+
+  const currentHole = course.holes[activeRound.currentHole - 1];
+  const yardages = calculateHoleYardages(location, currentHole.targets, 'yards');
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.heroCard}>
         <Text style={styles.eyebrow}>Active Round</Text>
-        <Text style={styles.title}>{sampleCourse.name}</Text>
+        <Text style={styles.title}>{course.name}</Text>
         <Text style={styles.subtitle}>
-          Hole {currentHole.number} • Par {currentHole.par} • {currentHole.distance} yds
+          Hole {currentHole.number} | Par {currentHole.par} | {currentHole.distance} yds
         </Text>
+      </View>
+
+      <View style={[styles.statusCard, gpsState === 'live' ? styles.statusCardLive : styles.statusCardDemo]}>
+        <Text style={styles.statusTitle}>
+          {gpsState === 'live' ? 'Live GPS' : gpsState === 'loading' ? 'Starting GPS' : 'Demo GPS'}
+        </Text>
+        <Text style={styles.statusCopy}>{gpsMessage}</Text>
       </View>
 
       <YardageCard front={yardages.front} center={yardages.center} back={yardages.back} />
@@ -74,10 +184,11 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.footerCard}>
-        <Text style={styles.footerTitle}>Current Setup State</Text>
+        <Text style={styles.footerTitle}>Sprint 1 Direction</Text>
         <Text style={styles.footerCopy}>
-          This screen is wired to seeded course, round, and GPS data so the real round engine can
-          replace it incrementally without rewriting the layout.
+          The Play screen now loads course data through a catalog service and prefers live GPS
+          updates. The next step is replacing seeded course content with Supabase-backed course
+          records and persisted round state.
         </Text>
       </View>
     </ScrollView>
@@ -110,6 +221,26 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#d9e4d7',
     fontSize: 15
+  },
+  statusCard: {
+    borderRadius: 20,
+    padding: 16,
+    gap: 6
+  },
+  statusCardLive: {
+    backgroundColor: '#ddf1df'
+  },
+  statusCardDemo: {
+    backgroundColor: '#f3e4c8'
+  },
+  statusTitle: {
+    color: '#18231d',
+    fontSize: 16,
+    fontWeight: '800'
+  },
+  statusCopy: {
+    color: '#344138',
+    lineHeight: 20
   },
   section: {
     backgroundColor: '#fff9ef',
@@ -170,5 +301,23 @@ const styles = StyleSheet.create({
   footerCopy: {
     color: '#344138',
     lineHeight: 20
+  },
+  errorState: {
+    flex: 1,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    backgroundColor: '#f4ecdf'
+  },
+  errorTitle: {
+    color: '#18231d',
+    fontSize: 24,
+    fontWeight: '800'
+  },
+  errorCopy: {
+    color: '#455247',
+    textAlign: 'center',
+    lineHeight: 22
   }
 });

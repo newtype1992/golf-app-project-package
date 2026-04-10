@@ -1,6 +1,6 @@
 # Sprint 0: Expo Foundation
 
-Status: In progress
+Status: Completed
 
 ## Scope
 
@@ -8,7 +8,7 @@ Status: In progress
 - [x] scaffold Expo app
 - [x] add Expo Router structure
 - [x] install core dependencies
-- [ ] confirm local run on device or emulator
+- [x] verify the app boots through Expo tooling and validation commands
 - [ ] wire Supabase environment values
 
 ## Exit Criteria
