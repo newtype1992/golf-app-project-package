@@ -1,53 +1,49 @@
 # Project Structure
 
-This repository started as a product-spec package. It now also includes an implementation scaffold so the actual app can be built without losing the original planning documents.
+This repo is now split into documentation, the Expo mobile app, backend assets, and tracking docs.
 
-## Root files
+## Root
 
-- `README.md`: package overview and entry point
-- `context.md`: product scope, requirements, flows, and roadmap intent
-- `architecture.md`: domain boundaries and sync model
-- `design-principles.md`: UX rules for iPhone and Apple Watch
-- `agents.md`: delivery guardrails for AI-assisted work
-- `PROJECT_SETUP.md`: practical build setup steps for macOS/Xcode
-- `PROJECT_STRUCTURE.md`: intended repository layout
+- `README.md`
+- `context.md`
+- `architecture.md`
+- `design-principles.md`
+- `agents.md`
+- `PROJECT_SETUP.md`
+- `PROJECT_STRUCTURE.md`
 
-## Implementation directories
+## Mobile App
 
-- `apps/ios/`: future iPhone app target and app-specific code
-- `apps/watchos/`: future watchOS app target and watch-specific UI
-- `packages/GolfCore/`: shared Swift package for domain models and business logic
-- `backend/supabase/`: migrations, seed data, and backend setup assets
-- `tests/`: acceptance, sync, and field-testing artifacts
-- `docs/`: implementation notes that sit beside the product package
-- `tracking/`: roadmap, sprint plans, and execution status
+`mobile/` contains the Expo Router app.
 
-## Recommended code ownership
+Key folders:
 
-- `apps/ios/`
-  - phone-only screens
-  - phone navigation
-  - history and stats UI
-- `apps/watchos/`
-  - glanceable yardage screen
-  - quick score entry
-  - reconnect and stale-state UI
-- `packages/GolfCore/`
-  - `Domain`
-  - `CourseData`
-  - `RoundEngine`
-  - `Scoring`
-  - `Sync`
-  - `Stats`
-- `backend/supabase/`
-  - schema migrations
-  - row-level security policies
-  - seed or import helpers
-- `tests/`
-  - acceptance flows
-  - sync conflict tests
-  - outdoor/field validation checklists
+- `mobile/app/`: route files
+- `mobile/components/`: UI building blocks
+- `mobile/services/`: domain logic
+- `mobile/assets/`: images and icons
 
-## What is missing right now
+Service modules:
 
-There is still no generated Xcode project or runnable app code in this repository. That work must be done on macOS with Xcode. The current scaffold is meant to keep implementation organized and aligned with the package rules.
+- `course`
+- `gps`
+- `roundEngine`
+- `scoring`
+- `stats`
+- `sync`
+
+## Backend
+
+`backend/supabase/` contains:
+
+- `migrations/`
+- `seeds/`
+- `imports/`
+
+## Tracking
+
+`tracking/` contains:
+
+- `ROADMAP.md`
+- `STATUS.md`
+- sprint-specific checklists

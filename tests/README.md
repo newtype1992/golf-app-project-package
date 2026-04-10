@@ -1,7 +1,7 @@
 # Tests
 
-Testing assets should be split by purpose:
+Keep testing assets split by purpose:
 
-- `acceptance/` for end-to-end product flows
-- `sync/` for phone/watch reconciliation scenarios
-- `field/` for outdoor and real-round validation notes
+- `acceptance/` for complete round flows
+- `sync/` for offline and reconciliation scenarios
+- `field/` for outdoor GPS and usability checks

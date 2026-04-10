@@ -1,7 +1,10 @@
 # Backend
 
-Supabase assets belong here.
+Supabase is the default backend for this project.
 
-- `supabase/migrations/` for schema migrations
-- `supabase/seeds/` for sample data or local setup
-- `supabase/imports/` for course import helpers if needed later
+Use this directory for:
+
+- schema migrations
+- seed data
+- import tooling for course data
+- notes on row-level security and sync rules
